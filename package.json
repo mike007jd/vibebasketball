@@ -1,0 +1,26 @@
+{
+  "name": "vibe-basketball",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mike007jd/vibebasketball.git"
+  },
+  "bugs": "https://github.com/mike007jd/vibebasketball/issues",
+  "homepage": "https://github.com/mike007jd/vibebasketball#readme",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:smoke": "node tools/smoke.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vite": "^6.0.0"
+  }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Vibe Basketball — a procedural 1v1 street-basketball game built with Three.js." />
+  <link rel="icon" href="data:," />
+  <title>Vibe Basketball</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hud">
+    <div id="scoreboard">
+      <div class="team away"><span class="tname" id="nameA">AWAY</span><span class="tscore" id="scoreA">0</span></div>
+      <div id="score-mid">
+        <div id="target-score">TO 11</div>
+        <div id="shot-clock">24</div>
+      </div>
+      <div class="team home"><span class="tscore" id="scoreB">0</span><span class="tname" id="nameB">HOME</span></div>
+    </div>
+    <div id="center-msg"></div>
+    <div id="shot-feedback"></div>
+    <div id="possession-task">
+      <span class="task-kicker">POSSESSION RULE</span>
+      <strong>CLEAR THE ARC</strong>
+      <span>Cross the glowing three-point line before attacking</span>
+    </div>
+    <div id="context-controls"></div>
+    <div id="shot-meter">
+      <div class="sm-track">
+        <div class="sm-stable"></div>
+        <div class="sm-green"></div>
+        <div class="sm-fill"></div>
+        <div class="sm-mark"></div>
+      </div>
+    </div>
+    <div id="debug"></div>
+    <div id="controls-help">
+      <div class="ch-title">CONTROLS <span class="ch-hint">(H to hide)</span></div>
+      <div class="ch-cols">
+        <div class="ch-col">
+          <div class="ch-row"><b>WASD / L-Stick</b><span>Move</span></div>
+          <div class="ch-row"><b>Shift</b><span>Sprint</span></div>
+          <div class="ch-row"><b>Hold Ctrl</b><span>Physical &mdash; see right</span></div>
+          <div class="ch-row"><b>Tap &larr; / &rarr;</b><span>Away hand: cross; ball side: side drive</span></div>
+          <div class="ch-row"><b>Tap &uarr; / &darr;</b><span>Between legs / wide behind-back</span></div>
+          <div class="ch-row"><b>Hold Arrow Steady</b><span>Directional hop shot or rim finish</span></div>
+          <div class="ch-row"><b>Shift + WASD</b><span>Burst during a handle move</span></div>
+          <div class="ch-row"><b>K / Y</b><span>Spin / post half-spin</span></div>
+          <div class="ch-row"><b>Tap Space</b><span>Pump fake</span></div>
+        </div>
+        <div class="ch-col">
+          <div class="ch-row"><b>Hold Space / B</b><span>Shoot; release for timing</span></div>
+          <div class="ch-row"><b>Drive + Hold &larr;/&rarr;</b><span>Left/right glass layup; sprint for dunk</span></div>
+          <div class="ch-row"><b>Drive + Hold &uarr;/&darr;</b><span>Front finish / floater; sprint rear dunk</span></div>
+          <div class="ch-row"><b>Outside + Hold Arrows</b><span>Side hop / forward hop / step-back shot</span></div>
+          <div class="ch-row"><b>E / LB</b><span>Steal (on defense)</span></div>
+          <div class="ch-row"><b>Space / B</b><span>Contest, or rebound if the ball is up</span></div>
+          <div class="ch-row"><b>Hold Ctrl</b><span>Defence: low stance &mdash; slower, but you can
+            bump and box out. Offence: post up, or shield the handle</span></div>
+        </div>
+      </div>
+      <div class="ch-cols">
+        <div class="ch-col">
+          <div class="ch-row"><b>C</b><span>Camera preset</span></div>
+          <div class="ch-row"><b>P</b><span>Attract mode (AI vs AI)</span></div>
+        </div>
+        <div class="ch-col">
+          <div class="ch-row"><b>F3</b><span>Debug overlay</span></div>
+          <div class="ch-row"><b>R</b><span>Reset match</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="loading">BUILDING THE PARK…</div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
