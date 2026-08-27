@@ -45,7 +45,10 @@ export class Ball {
     // scoring detection
     this._prevY = 0;
 
-    const tex = makeBallTexture();
+    const textures = getBallTextures();
+    const tex = textures.standard;
+    this.ballTextures = textures;
+    this.visualKind = 'standard';
     this.mesh = new THREE.Mesh(
       new THREE.SphereGeometry(R, 28, 22),
       new THREE.MeshStandardMaterial({
@@ -65,6 +68,18 @@ export class Ball {
     this.trailLine = null;
 
     this.events = []; // consumed by game: [{type:'score'|'board'|'rim'|'floor'|'bounce'...}]
+  }
+
+  setContestKind(kind = 'standard') {
+    const next = kind === 'money' || kind === 'logo' ? kind : 'standard';
+    const material = this.mesh.material;
+    const texture = this.ballTextures[next];
+    material.map = texture;
+    material.bumpMap = texture;
+    material.emissive.set(next === 'money' ? 0x07383e : next === 'logo' ? 0x0b1d58 : 0x000000);
+    material.emissiveIntensity = next === 'standard' ? 0 : 0.42;
+    material.needsUpdate = true;
+    this.visualKind = next;
   }
 
   isLive() {
@@ -554,29 +569,50 @@ const _q = new THREE.Quaternion();
 const _anchor = new THREE.Vector3();
 const _attachD = new THREE.Vector3();
 
-function makeBallTexture() {
+let sharedBallTextures = null;
+
+function getBallTextures() {
+  if (!sharedBallTextures) {
+    sharedBallTextures = {
+      standard: makeBallTexture({
+        base: '#c25a1e', dark: '60,20,5', light: '255,190,130', pebble: '80,30,8', seam: '#1a0e06',
+      }),
+      money: makeBallTexture({
+        base: '#45dce8', dark: '4,52,61', light: '190,255,255', pebble: '7,70,77', seam: '#062a30',
+      }),
+      logo: makeBallTexture({
+        base: '#3e70ff', dark: '8,20,74', light: '190,207,255', pebble: '12,30,92', seam: '#071337',
+      }),
+    };
+  }
+  return sharedBallTextures;
+}
+
+function makeBallTexture(palette) {
   const S = 512;
   const c = document.createElement('canvas');
   c.width = S; c.height = S;
   const ctx = c.getContext('2d');
   // base leather orange with noise
-  ctx.fillStyle = '#c25a1e';
+  ctx.fillStyle = palette.base;
   ctx.fillRect(0, 0, S, S);
   for (let i = 0; i < 9000; i++) {
     const x = Math.random() * S, y = Math.random() * S;
     const v = Math.random();
-    ctx.fillStyle = v < 0.5 ? `rgba(60,20,5,${0.05 + Math.random() * 0.12})` : `rgba(255,190,130,${0.03 + Math.random() * 0.07})`;
+    ctx.fillStyle = v < 0.5
+      ? `rgba(${palette.dark},${0.05 + Math.random() * 0.12})`
+      : `rgba(${palette.light},${0.03 + Math.random() * 0.07})`;
     ctx.fillRect(x, y, 2, 2);
   }
   // pebble dots
   for (let i = 0; i < 2600; i++) {
-    ctx.fillStyle = `rgba(80,30,8,${0.1 + Math.random() * 0.15})`;
+    ctx.fillStyle = `rgba(${palette.pebble},${0.1 + Math.random() * 0.15})`;
     ctx.beginPath();
     ctx.arc(Math.random() * S, Math.random() * S, 1.2 + Math.random() * 1.2, 0, 7);
     ctx.fill();
   }
   // seams
-  ctx.strokeStyle = '#1a0e06';
+  ctx.strokeStyle = palette.seam;
   ctx.lineWidth = 7;
   ctx.beginPath(); ctx.moveTo(S * 0.25, 0); ctx.lineTo(S * 0.25, S); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(S * 0.75, 0); ctx.lineTo(S * 0.75, S); ctx.stroke();

@@ -8,6 +8,7 @@ import * as THREE from 'three';
  *   sprint: bool
  *   shoot: bool (held)
  *   shootPressed / shootReleased: edge events (consumed on read)
+ *   confirmPressed: gamepad A edge for UI actions (never keyboard Space)
  *   dribbleMove: 'cross' | 'btl' | 'behind' | 'spin' | 'hesitation' | null
  *   steal: bool edge
  *   contest: bool (== shoot on defense)
@@ -48,6 +49,7 @@ class Input {
       shoot: false,
       shootPressed: false,
       shootReleased: false,
+      confirmPressed: false,
       dribbleMove: null,
       stealPressed: false,
       pausePressed: false,
@@ -145,7 +147,7 @@ class Input {
       const pads = navigator.getGamepads ? navigator.getGamepads() : [];
       pad = pads[this.gamepadIndex] || null;
     }
-    let padShootPressed = false, padShootReleased = false, padSteal = false;
+    let padShootPressed = false, padShootReleased = false, padConfirmPressed = false, padSteal = false;
     let padShootCommitted = false, padShootReleasedCommitted = false;
     let padDribble = null, padSpin = false;
     if (pad) {
@@ -158,10 +160,12 @@ class Input {
         ix = lx * s; iz = ly * s; mag = Math.min(1, lmag * s);
       }
       it.sprint = (pad.buttons[7]?.value ?? 0) > 0.4 || (pad.buttons[10]?.pressed ?? false);
-      const shootNow = (pad.buttons[0]?.pressed ?? false) || (pad.buttons[2]?.pressed ?? false);
+      const confirmNow = pad.buttons[0]?.pressed ?? false;
+      const shootNow = confirmNow || (pad.buttons[2]?.pressed ?? false);
       const prevShoot = prevPad.shoot ?? false;
       padShootPressed = shootNow && !prevShoot;
       padShootReleased = !shootNow && prevShoot;
+      padConfirmPressed = confirmNow && !(prevPad.confirm ?? false);
       const shootStartedAt = padShootPressed ? performance.now() : prevPad.shootStartedAt;
       padShootCommitted = shootNow && performance.now() - (shootStartedAt ?? performance.now()) >= 160;
       padShootReleasedCommitted = padShootReleased && !!prevPad.shootCommitted;
@@ -175,6 +179,7 @@ class Input {
       if (Ybtn && !prevY) padSpin = true;
       this.prevGamepad = {
         shoot: shootNow,
+        confirm: confirmNow,
         shootStartedAt: shootNow ? shootStartedAt : null,
         shootCommitted: padShootCommitted,
         x: X,
@@ -223,6 +228,7 @@ class Input {
     it.shoot = kbShoot || (pad ? (this.prevGamepad?.shoot ?? false) : false);
     it.shootPressed = kbShootPressed || padShootPressed;
     it.shootReleased = kbShootReleased || padShootReleased;
+    it.confirmPressed = padConfirmPressed;
     it.shootCommitted = this.shootCommitted || padShootCommitted;
     it.shootReleasedCommitted = kbShootReleased ? this.shootReleasedCommitted : padShootReleasedCommitted;
 
@@ -287,11 +293,13 @@ class Input {
       (pad ? (this.prevGamepad?.lb ?? false) : false);
     // --- ui keys ---
     this.camKeys = [];
+    this.uiKeys = [];
     if (this.pressed.has('KeyC')) this.camKeys.push('C');
     if (this.pressed.has('KeyP')) this.camKeys.push('P');
     if (this.pressed.has('KeyH')) this.camKeys.push('H');
     if (this.pressed.has('F3')) this.camKeys.push('F3');
     if (this.pressed.has('KeyR')) this.camKeys.push('R');
+    if (this.pressed.has('Enter')) this.uiKeys.push('ENTER');
 
     this.pressed.clear();
     this.released.clear();
