@@ -1,0 +1,199 @@
+{
+  "asset": "vibe-contest-props",
+  "version": 1,
+  "workstream": "three-point-contest-props",
+  "provider": "claude-code",
+  "model": "claude-opus-5",
+  "effort": "medium",
+  "timestamp_utc": "2026-08-27T14:35:59+00:00",
+  "tools": {
+    "blender": "5.2.0 LTS",
+    "gltf_exporter": "5.2.39",
+    "python": "3.13.13",
+    "platform": "darwin"
+  },
+  "source": {
+    "path": "tools/blender/contest_props.py",
+    "sha256": "33d5b1ee42f1d97a09851ef42238b121168127f691cf596c9f49a791d8be34b1"
+  },
+  "glb": {
+    "path": "public/models/contest/vibe-contest-props.glb",
+    "bytes": 273628,
+    "sha256": "6cb33aa27cd03d813ca1772ee1ae2065ade1eb73f5ddc1caf5248b4857b4baf9"
+  },
+  "scene_contract": {
+    "units": "metres",
+    "up": "Y",
+    "front": "-Z (emblem side; the scene yaws local +Z at the hoop, which leaves the emblem facing the shooter and camera)",
+    "origin": "feet on y=0, centred on x/z",
+    "ball_diameter_m": 0.238,
+    "cradle_ring_radius_m": 0.095,
+    "rack_slot_pitch_m": 0.27,
+    "rack_slot_x_m": [
+      -0.54,
+      -0.27,
+      0.0,
+      0.27,
+      0.54
+    ],
+    "rack_ball_centre_y_m": 0.91,
+    "pedestal_ball_centre_y_m": 0.93,
+    "consumer": "src/world/contestRacks.js",
+    "collision": "none \u2014 decorative only, no collider is exported"
+  },
+  "roots": {
+    "Rack": [
+      "Rack_LOD0",
+      "Rack_LOD1"
+    ],
+    "Pedestal": [
+      "Pedestal_LOD0",
+      "Pedestal_LOD1"
+    ]
+  },
+  "lods": {
+    "Rack_LOD0": {
+      "triangles": 4312,
+      "materials": [
+        "VibeSteel",
+        "VibeCastMetal",
+        "VibeGrip",
+        "VibeAccentOrange",
+        "VibeAccentTeal"
+      ],
+      "bounds_m_yup": {
+        "min": [
+          -0.68,
+          0.002,
+          -0.296
+        ],
+        "max": [
+          0.68,
+          0.8563,
+          0.296
+        ]
+      }
+    },
+    "Rack_LOD1": {
+      "triangles": 1164,
+      "materials": [
+        "VibeSteel",
+        "VibeCastMetal",
+        "VibeGrip",
+        "VibeAccentOrange",
+        "VibeAccentTeal"
+      ],
+      "bounds_m_yup": {
+        "min": [
+          -0.68,
+          0.002,
+          -0.296
+        ],
+        "max": [
+          0.68,
+          0.8555,
+          0.296
+        ]
+      }
+    },
+    "Pedestal_LOD0": {
+      "triangles": 1952,
+      "materials": [
+        "VibeCastMetal",
+        "VibeAccentTeal",
+        "VibeSteel",
+        "VibeAccentOrange"
+      ],
+      "bounds_m_yup": {
+        "min": [
+          -0.305,
+          0.0,
+          -0.305
+        ],
+        "max": [
+          0.305,
+          0.8763,
+          0.305
+        ]
+      }
+    },
+    "Pedestal_LOD1": {
+      "triangles": 520,
+      "materials": [
+        "VibeCastMetal",
+        "VibeAccentTeal",
+        "VibeAccentOrange",
+        "VibeSteel"
+      ],
+      "bounds_m_yup": {
+        "min": [
+          -0.305,
+          0.0,
+          -0.3
+        ],
+        "max": [
+          0.305,
+          0.8755,
+          0.3
+        ]
+      }
+    }
+  },
+  "licensing": {
+    "origin": "original geometry authored procedurally in this script",
+    "third_party_source": "none",
+    "textures": "none \u2014 untextured PBR materials only",
+    "marks": "no NBA, State Farm, Starry, Wilson or any third-party mark"
+  },
+  "evidence": {
+    "cold_import": {
+      "file": "vibe-contest-props.glb",
+      "blender": "5.2.0 LTS",
+      "objects": [
+        "Pedestal",
+        "Pedestal_LOD0",
+        "Pedestal_LOD1",
+        "Rack",
+        "Rack_LOD0",
+        "Rack_LOD1"
+      ],
+      "roots_found": [
+        "Rack",
+        "Pedestal"
+      ],
+      "errors": "none"
+    },
+    "previews": [
+      {
+        "file": "broadcast-14m.jpg",
+        "sha256": "8373cfd87f82bb57adf0f403c8d3b6e31b2a3ffc395975dc6d29e1586ad80b13",
+        "bytes": 45800
+      },
+      {
+        "file": "fit-check.jpg",
+        "sha256": "25cefecec4defdfb1c5f88fc811ad22e2f55fbe1ed2b3b47081bf47a832b2dbc",
+        "bytes": 93945
+      },
+      {
+        "file": "front.jpg",
+        "sha256": "a1ebdfbc02eb50cb4dc697ba20bc566ae5f33983dd958ac48e0214d33610c8c0",
+        "bytes": 88912
+      },
+      {
+        "file": "lod0-vs-lod1.jpg",
+        "sha256": "bcbed847fd80be2cdcde2cd6e69fc9ec4deb4cbc60e2b8b0256c8ffea4e97562",
+        "bytes": 77983
+      },
+      {
+        "file": "three-quarter.jpg",
+        "sha256": "e1fcd5af17eb107c3c9d7b5e4dc45d81b47aa4e73dcaa752f2f287ac352f2d09",
+        "bytes": 93176
+      },
+      {
+        "file": "top.jpg",
+        "sha256": "f30ec946e370a011af41624d2fe5093998081760693ec470bc3a9a8d08f05f3c",
+        "bytes": 64870
+      }
+    ]
+  }
+}

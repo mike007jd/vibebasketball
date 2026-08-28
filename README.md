@@ -1,6 +1,7 @@
 # Vibe Basketball
 
-A playable 1v1 street-basketball game that runs entirely in the browser.
+A playable street-basketball game with 1v1 and a four-shooter 3-Point Contest,
+running entirely in the browser.
 This is an AI-assisted learning project: the goal was to explore how far a
 small Three.js game can go without a game engine, physics package, downloaded
 character models, or animation packs.
@@ -15,7 +16,12 @@ character models, or animation packs.
 - Dribble moves, burst exits, gathers, pump fakes, jumpers, layups and dunks
 - A timing-based shot meter and physical rim, backboard and net reactions
 - An AI opponent plus an AI-vs-AI attract mode
+- A four-shooter 3-Point Contest with 1–4 local players, five racks, a selectable
+  money rack, two deep balls, CPU watch/skip, a top-three Final and official
+  advancement/championship shoot-off clocks
 - Runtime-generated athletes, basketball poses, court art and WebAudio effects
+- An original unbranded Vibe rack and deep-ball pedestal with source, LODs and
+  cold-import acceptance evidence
 
 The public repository intentionally ships no proprietary character files,
 motion-capture clips or third-party animation packs. Player geometry, rigging
@@ -39,6 +45,8 @@ Open <http://localhost:5173>.
 
 Useful URL options:
 
+- `?mode=1v1` — open 1v1 directly
+- `?mode=three-point` — open the 3-Point Contest directly
 - `?attract=1` — AI vs AI
 - `?debug=1` — show the state overlay
 - `?clean=1` — hide the help panel
@@ -60,16 +68,24 @@ Useful URL options:
 - `R` rematch
 - `F3` debug overlay
 
+The start menu also includes a complete **How to Play** screen. In the contest,
+choose the local player count, select a money rack when each player comes up,
+then hold and release `Space` to shoot; running and rack changes are automatic.
+Press `Enter` during a CPU turn to simulate to the next local player.
+
 ## Verify
 
 ```bash
 npm run build
 npm run test:smoke
+npm run test:three-point-rules
+npm run test:three-point
 ```
 
-The smoke check starts its own Vite server, opens the default game, verifies
-that both athletes use the procedural rig and animator, and fails if the page
-requests a model or animation file.
+The smoke check starts its own Vite server and verifies that the athletes remain
+fully procedural with no character-model or animation-pack requests. The
+contest probes cover menu navigation, pass-and-play order, rack scoring,
+watch/skip determinism, elimination, both shoot-off clocks and the champion path.
 
 ## License
 

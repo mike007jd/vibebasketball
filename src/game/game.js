@@ -19,7 +19,7 @@ function pointSegmentDistance(point, a, b, tmp) {
   return tmp.multiplyScalar(t).add(a).distanceTo(point);
 }
 
-const PLAYER_CONFIGS = [
+export const PLAYER_CONFIGS = [
   {
     name: 'VOLT', team: 0, skill: 0.85,
     skin: 0x6e4a30, jersey: 0x23262c, shorts: 0x1d5a5e, shoes: 0xd8551f,
@@ -34,6 +34,7 @@ const PLAYER_CONFIGS = [
 
 export class Game {
   constructor(scene, hud, opts = {}) {
+    this.mode = '1v1';
     this.scene = scene;
     this.hud = hud;
     this.opts = opts;

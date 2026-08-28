@@ -3,7 +3,8 @@ import { clamp, lerp, damp, dampAngle, angleDelta, rand } from '../utils.js';
 import { COURT, isBeyondArc } from '../world/court.js';
 import { Animator } from '../anim/animator.js';
 import { Rig } from './rig.js';
-import { releaseTiming, releaseMakeMultiplier } from '../game/shotTiming.js';
+import { releaseTiming } from '../game/shotTiming.js';
+import { decideJumpShot } from '../game/shotOutcome.js';
 
 const G = 9.81;
 
@@ -12,29 +13,32 @@ function makeUserMarker() {
   canvas.width = 256;
   canvas.height = 112;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const x = 8, y = 8, w = 240, h = 96, r = 44;
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(5, 15, 22, 0.92)';
-  ctx.fill();
-  ctx.lineWidth = 8;
-  ctx.strokeStyle = '#42e7ff';
-  ctx.stroke();
-  ctx.font = '900 58px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('YOU', 128, 59);
+  const redraw = (label = 'YOU', border = '#42e7ff') => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const x = 8, y = 8, w = 240, h = 96, r = 44;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(5, 15, 22, 0.92)';
+    ctx.fill();
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = border;
+    ctx.stroke();
+    ctx.font = '900 58px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label, 128, 59);
+  };
+  redraw();
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;
   const marker = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -44,6 +48,11 @@ function makeUserMarker() {
   marker.renderOrder = 1000;
   marker.visible = false;
   marker.userData.label = 'YOU';
+  marker.userData.setLabel = (label, color) => {
+    marker.userData.label = label;
+    redraw(label, color);
+    map.needsUpdate = true;
+  };
   return marker;
 }
 
@@ -248,6 +257,11 @@ export class Player {
     this.rig.ring.visible = !!on;
     this.userMarker.visible = !!on;
     if (on) this.rig.ring.material.color.set(0x42e7ff);
+  }
+
+  setIndicatorLabel(label = 'YOU', color = '#42e7ff') {
+    this.userMarker.userData.setLabel?.(label, color);
+    this.rig.ring.material.color.set(color);
   }
 
   get isShooting() {
@@ -1238,6 +1252,30 @@ export class Player {
 
   // ------------------------------------------------------------ shooting
 
+  /** The rack contest starts from triple-threat and always uses a set jumper. */
+  startContestShot(chargeMode = true) {
+    if (!this.hasBall || this.isShooting || this.action) return false;
+    this.gatherAction = null;
+    this.dribbleEnded = true;
+    this.dribbleStarted = false;
+    this.moveAnim = null;
+    this.skillPath = null;
+    this.burstDrive = null;
+    this.vel.x = 0;
+    this.vel.z = 0;
+    this.catchT = 0;
+    const spec = SHOT.jumpshot;
+    const jumpH = spec.jump * lerp(0.82, 1, this.stamina);
+    this.action = {
+      name: 'shot', t: 0, dur: spec.dur, variant: 'jumpshot',
+      released: false, chargeMode, perfectT: spec.perfectT, releasedAt: null,
+      moveScale: 0, jumpAt: jumpFrac(spec), jumped: false, jumpH,
+      drift: 0, preGatherDribbleStarted: false, contestAttempt: true,
+    };
+    this.moveLock = spec.dur * 0.9;
+    return true;
+  }
+
   /** start a jumper. Called on shoot press (with ball). */
   startShot(chargeMode = true, driveSnapshot = null, gatherSnapshot = null, requireHoldCommit = false) {
     if (!this.hasBall || this.isShooting || this.action) return false;
@@ -2062,16 +2100,20 @@ export class Player {
 
     // Fresh legs must not be a penalty. The previous inverse multiplier gave a
     // fully rested shooter 0.75x accuracy and an exhausted one 1.0x.
-    const fatigue = lerp(0.78, 1, this.stamina);
-    const base = clamp(1.02 - dRim * 0.052, 0.36, 0.94);
-    const moving = Math.hypot(this.vel.x, this.vel.z) > 3 ? 0.9 : 1;
-    let q = base * releaseMakeMultiplier(timingQ) * (1 - contest * 0.55) * fatigue * moving;
-    q = clamp(q, 0.005, 0.96);
+    const computed = decideJumpShot({
+      distance: dRim,
+      timingQuality: timingQ,
+      contest,
+      stamina: this.stamina,
+      moving: Math.hypot(this.vel.x, this.vel.z) > 3,
+    });
+    const override = world.consumeShotOutcomeOverride?.(this, timingQ) ?? null;
+    const q = override?.probability ?? computed.probability;
 
     // PERFECT is a gameplay contract, not green-coloured probability. A real
     // block can still cancel the shot in Game.resolveBlock(), but an unblocked
     // release in the exact window must follow a make trajectory every time.
-    const made = timingQ >= 1 || Math.random() < q;
+    const made = override?.made ?? computed.made;
     const rc = COURT.rimCenter;
     let target = new THREE.Vector3(rc.x, rc.y, rc.z);
     if (!made) {

@@ -14,7 +14,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:smoke": "node tools/smoke.mjs"
+    "test:smoke": "node tools/smoke.mjs",
+    "test:three-point-rules": "node tools/three_point_rules_probe.mjs",
+    "test:three-point": "node tools/three_point_contest_probe.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

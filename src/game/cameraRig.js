@@ -62,11 +62,55 @@ export class CameraRig {
   }
 
   update(dt, world) {
+    if (world.mode === 'three-point') return this.updateContest(dt, world);
     const P = PRESETS[this.presetIdx];
     if (P.mode === '2k') return this.update2K(dt, world, P);
     if (P.mode === 'portrait') return this.updatePortrait(dt, world, P);
     if (P.mode === 'inspect') return this.updateInspect(dt, world, P);
     return this.updateSide(dt, world, P);
+  }
+
+  // ------------------------------------------------------------ contest rig
+
+  updateContest(dt, world) {
+    if (world.state === 'player-count') {
+      this._v.set(0, 3.0, 14.2);
+      this.pos.x = damp(this.pos.x, this._v.x, 5.5, dt);
+      this.pos.y = damp(this.pos.y, this._v.y, 5.5, dt);
+      this.pos.z = damp(this.pos.z, this._v.z, 5.5, dt);
+      this.focus.x = damp(this.focus.x, 0, 6.0, dt);
+      // Frame the whole four-player lineup above the bottom setup panel rather
+      // than centring on their heads and hiding every body behind the UI.
+      this.focus.y = damp(this.focus.y, 0.35, 6.0, dt);
+      this.focus.z = damp(this.focus.z, 7.0, 6.0, dt);
+      this.fov = damp(this.fov, 42, 5.0, dt);
+      this.commit(dt, false);
+      return;
+    }
+    const ball = world.ball;
+    const shooter = world.offense;
+    const liveFlight = ball?.state === 'shot';
+    const sx = shooter?.pos.x ?? 0;
+    const sz = shooter?.pos.z ?? 7.2;
+    let fx = sx * 0.46;
+    let fz = lerp(sz, COURT.rimCenter.z, 0.38);
+    if (liveFlight) {
+      fx = lerp(fx, ball.pos.x, 0.38);
+      fz = lerp(fz, ball.pos.z, 0.32);
+    }
+    this._v.set(
+      clamp(sx * 0.18, -1.2, 1.2),
+      liveFlight ? 7.75 : 7.35,
+      liveFlight ? 18.9 : 18.25,
+    );
+    this.pos.x = damp(this.pos.x, this._v.x, 2.6, dt);
+    this.pos.y = damp(this.pos.y, this._v.y, 3.2, dt);
+    this.pos.z = damp(this.pos.z, this._v.z, 3.2, dt);
+    this.focus.x = damp(this.focus.x, clamp(fx, -4.8, 4.8), 4.2, dt);
+    this.focus.z = damp(this.focus.z, clamp(fz, 2.2, 9.5), 4.0, dt);
+    this.focus.y = damp(this.focus.y, liveFlight ? 1.8 : 1.25, 4.0, dt);
+    this.fov = damp(this.fov, liveFlight ? 42 : 45, 2.4, dt);
+    this.commit(dt);
   }
 
   // ------------------------------------------------------------ 2K rig

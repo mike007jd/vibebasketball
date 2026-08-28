@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Vibe Basketball — a procedural 1v1 street-basketball game built with Three.js." />
+  <meta name="description" content="Vibe Basketball — procedural 1v1 street basketball and a four-player 3-Point Contest built with Three.js." />
   <link rel="icon" href="data:," />
   <title>Vibe Basketball</title>
   <link rel="stylesheet" href="/src/style.css" />
@@ -11,6 +11,80 @@
 <body>
   <div id="app"></div>
   <div id="hud">
+    <section id="mode-menu" class="ui-overlay" aria-label="Choose game mode">
+      <div class="menu-brand">
+        <span class="menu-kicker">WELCOME TO THE PARK</span>
+        <h1>VIBE<br><em>BASKETBALL</em></h1>
+        <p>Pick your run. Same court, different pressure.</p>
+      </div>
+      <div class="mode-cards" role="listbox" aria-label="Start menu">
+        <button id="mode-1v1" class="mode-card selected" data-mode="1v1" type="button">
+          <span class="mode-number">01</span>
+          <span class="mode-copy"><strong>1V1 STREET</strong><small>FIRST TO 11 · WIN BY 2</small></span>
+          <span class="mode-arrow">PLAY →</span>
+        </button>
+        <button id="mode-three-point" class="mode-card" data-mode="three-point" type="button">
+          <span class="mode-number">02</span>
+          <span class="mode-copy"><strong>3-POINT CONTEST</strong><small>4 SHOOTERS · 27 BALLS · 70 SECONDS</small></span>
+          <span class="mode-arrow">ENTER →</span>
+        </button>
+        <button id="mode-how-to" class="mode-card" data-mode="how-to" type="button">
+          <span class="mode-number">03</span>
+          <span class="mode-copy"><strong>HOW TO PLAY</strong><small>CONTROLS · RULES · SCORING</small></span>
+          <span class="mode-arrow">VIEW →</span>
+        </button>
+      </div>
+      <div class="menu-controls">W/S OR D-PAD TO SELECT <i></i> ENTER / A TO CONFIRM</div>
+    </section>
+
+    <section id="how-to-play" class="ui-overlay" aria-label="How to play">
+      <div class="how-to-shell">
+        <header class="how-to-header">
+          <div>
+            <span class="menu-kicker">COURT MANUAL</span>
+            <h2>HOW TO <em>PLAY</em></h2>
+          </div>
+          <p>Learn the essentials, then build your own game.</p>
+        </header>
+        <div class="how-to-modes">
+          <article class="how-to-mode street">
+            <div class="how-to-mode-title">
+              <span>01</span>
+              <div><h3>1V1 STREET</h3><small>FIRST TO 11 · WIN BY 2</small></div>
+            </div>
+            <div class="how-to-controls">
+              <div><kbd>WASD</kbd><span>Move</span><kbd>L-STICK</kbd></div>
+              <div><kbd>SHIFT</kbd><span>Sprint</span><kbd>RT</kbd></div>
+              <div><kbd>HOLD / RELEASE SPACE</kbd><span>Shoot with timing</span><kbd>A</kbd></div>
+              <div><kbd>TAP / HOLD ARROWS</kbd><span>Handles, hop shots and finishes</span></div>
+              <div><kbd>GAMEPAD X / Y</kbd><span>Hesitation / spin</span></div>
+              <div><kbd>E</kbd><span>Steal on defence</span><kbd>LB</kbd></div>
+            </div>
+            <p class="how-to-tip"><strong>CHECK BALL:</strong> After a change of possession, carry the ball beyond the glowing arc before attacking. Press <b>H</b> during 1V1 for the full move list.</p>
+          </article>
+          <article class="how-to-mode contest">
+            <div class="how-to-mode-title">
+              <span>02</span>
+              <div><h3>3-POINT CONTEST</h3><small>27 BALLS · 70 SECONDS · 40 MAX</small></div>
+            </div>
+            <div class="how-to-controls">
+              <div><kbd>1–4 PLAYERS</kbd><span>Local players take turns as P1–P4</span></div>
+              <div><kbd>← / →</kbd><span>Choose your money rack</span><kbd>D-PAD</kbd></div>
+              <div><kbd>HOLD / RELEASE SPACE</kbd><span>Shoot with timing</span><kbd>A</kbd></div>
+              <div><kbd>ENTER</kbd><span>Skip CPU action to your next turn</span><kbd>A</kbd></div>
+            </div>
+            <div class="how-to-scoring" aria-label="3-Point Contest scoring">
+              <span><b>1</b> REGULAR</span>
+              <span><b>2</b> MONEY BALL</span>
+              <span><b>3</b> DEEP BALL</span>
+            </div>
+            <p class="how-to-tip">Running, ball pickup and rack changes are automatic. The top three reach the Final; qualifiers shoot from lowest to highest Round 1 score.</p>
+          </article>
+        </div>
+        <button id="how-to-back" type="button"><span>←</span> BACK TO MODE SELECT <small>ESC / B</small></button>
+      </div>
+    </section>
+
     <div id="scoreboard">
       <div class="team away"><span class="tname" id="nameA">AWAY</span><span class="tscore" id="scoreA">0</span></div>
       <div id="score-mid">
@@ -19,6 +93,108 @@
       </div>
       <div class="team home"><span class="tscore" id="scoreB">0</span><span class="tname" id="nameB">HOME</span></div>
     </div>
+    <section id="contest-hud" aria-label="3-Point Contest scoreboard">
+      <div class="contest-topline">
+        <div><span id="contest-stage">ROUND 1</span><strong id="contest-entrant">VOLT</strong></div>
+        <div class="contest-clock"><span>TIME</span><strong id="contest-clock">70</strong></div>
+        <div class="contest-score"><span>SCORE</span><strong id="contest-score">0</strong><small>/ 40</small></div>
+      </div>
+      <div class="contest-progress">
+        <div><span id="contest-station">LEFT CORNER</span><small id="contest-ball-count">BALL 1 / 27</small></div>
+        <div id="contest-attempts" aria-label="Shot results"></div>
+      </div>
+      <aside id="contest-standings">
+        <header><span>TOURNAMENT ROAD</span><small id="contest-cutoff">4 SHOOTERS</small></header>
+        <section class="roadmap-stage roadmap-round-one">
+          <div class="roadmap-stage-title"><span>ROUND 1</span><small>TOP 3 ADVANCE</small></div>
+          <ol id="contest-ranking" class="roadmap-list"></ol>
+        </section>
+        <div class="roadmap-connector"><i></i><span>TOP 3</span></div>
+        <section class="roadmap-stage roadmap-final">
+          <div class="roadmap-stage-title"><span>FINAL</span><small>HIGH SCORE WINS</small></div>
+          <ol id="contest-roadmap-finalists" class="roadmap-list"></ol>
+        </section>
+        <div class="roadmap-connector champion-connector"><i></i><span>WINNER</span></div>
+        <div id="contest-roadmap-champion" class="roadmap-champion pending">
+          <span class="roadmap-trophy">★</span>
+          <div><small>CHAMPION</small><strong>TBD</strong></div>
+          <b>—</b>
+        </div>
+      </aside>
+      <button id="contest-skip-live" type="button">SIM TO MY NEXT TURN <span>ENTER / A</span></button>
+    </section>
+
+    <section id="contest-overlay" class="ui-overlay contest-dialog" aria-live="polite">
+      <div id="contest-setup-panel" class="dialog-panel setup-panel">
+        <div class="setup-copy">
+          <span class="dialog-kicker">LOCAL CONTEST</span>
+          <h2 id="contest-setup-title">HOW MANY PLAYERS?</h2>
+          <p id="contest-setup-copy">The first slots become P1–P4. Every open slot stays in the contest as CPU.</p>
+        </div>
+        <div id="player-count-options" aria-label="Local player count">
+          <button type="button" data-player-count="1" class="selected"><strong>1</strong><span>PLAYER</span></button>
+          <button type="button" data-player-count="2"><strong>2</strong><span>PLAYERS</span></button>
+          <button type="button" data-player-count="3"><strong>3</strong><span>PLAYERS</span></button>
+          <button type="button" data-player-count="4"><strong>4</strong><span>PLAYERS</span></button>
+        </div>
+        <div id="character-select-options" aria-label="Player slots">
+          <div class="player-card local" data-character-index="0" style="--character-color:#ff9a3c">
+            <i>ϟ</i><span><strong>VOLT</strong><small>ORANGE</small></span><em></em>
+          </div>
+          <div class="player-card cpu" data-character-index="1" style="--character-color:#f55cff">
+            <i>✦</i><span><strong>NOVA</strong><small>MAGENTA</small></span><em></em>
+          </div>
+          <div class="player-card cpu" data-character-index="2" style="--character-color:#72ff98">
+            <i>◆</i><span><strong>MIRA</strong><small>GREEN</small></span><em></em>
+          </div>
+          <div class="player-card cpu" data-character-index="3" style="--character-color:#ff665e">
+            <i>➤</i><span><strong>JETT</strong><small>RED</small></span><em></em>
+          </div>
+        </div>
+        <small id="contest-setup-hint">← / → PLAYERS · ENTER / A START</small>
+      </div>
+      <div id="money-rack-panel" class="dialog-panel">
+        <span class="dialog-kicker" id="money-rack-player">YOUR ADVANTAGE</span>
+        <h2>CHOOSE YOUR MONEY RACK</h2>
+        <p>Every ball on this rack is worth 2 points.</p>
+        <div id="money-rack-options">
+          <button type="button" data-rack="left-corner">LEFT<br>CORNER</button>
+          <button type="button" data-rack="left-wing">LEFT<br>WING</button>
+          <button type="button" data-rack="top">TOP</button>
+          <button type="button" data-rack="right-wing">RIGHT<br>WING</button>
+          <button type="button" data-rack="right-corner">RIGHT<br>CORNER</button>
+        </div>
+        <small>← / → SELECT · ENTER / A CONFIRM</small>
+      </div>
+      <div id="cpu-prompt-panel" class="dialog-panel">
+        <span class="dialog-kicker" id="cpu-round-label">ROUND 1</span>
+        <h2><span id="cpu-name">NOVA</span> IS UP</h2>
+        <p>The result is already locked. Watch the full rack or jump to your next turn.</p>
+        <div class="dialog-actions">
+          <button id="cpu-watch" type="button">WATCH</button>
+          <button id="cpu-sim" class="primary" type="button">SIM TO MY TURN <span>ENTER / A</span></button>
+        </div>
+      </div>
+      <div id="contest-elimination-panel" class="dialog-panel results-panel">
+        <span class="dialog-kicker">ROUND 1 COMPLETE</span>
+        <h2 id="contest-elimination-title">VOLT ELIMINATED</h2>
+        <p id="contest-elimination-copy">The top three advance to the Final.</p>
+        <ol id="contest-elimination-ranking"></ol>
+        <div class="dialog-actions">
+          <button id="contest-watch-final" type="button">WATCH FINAL</button>
+          <button id="contest-sim-final" class="primary" type="button">SIM FINAL <span>ENTER / A</span></button>
+        </div>
+      </div>
+      <div id="contest-results-panel" class="dialog-panel results-panel">
+        <span class="dialog-kicker">FINAL RESULT</span>
+        <h2 id="contest-winner">VOLT WINS</h2>
+        <ol id="contest-final-ranking"></ol>
+        <div class="dialog-actions">
+          <button id="contest-replay" class="primary" type="button">RUN IT BACK</button>
+          <button id="contest-menu" type="button">MODE MENU</button>
+        </div>
+      </div>
+    </section>
     <div id="center-msg"></div>
     <div id="shot-feedback"></div>
     <div id="possession-task">
